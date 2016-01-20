@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<project name="dia1" id="Project_11d640dd" html="y" template="Default" database="MySql" >
+	<schema name="dia1" schemaname="dia1" >
+		<table name="automate" >
+			<column name="id_state_from" type="int" jt="4" />
+			<column name="id_state_to" type="int" jt="4" />
+			<column name="id_signal" type="int" jt="4" />
+			<index name="idx_automate" unique="NORMAL" >
+				<column name="id_state_from" />
+			</index>
+			<index name="idx_automate_0" unique="NORMAL" >
+				<column name="id_state_to" />
+			</index>
+			<index name="idx_automate_1" unique="NORMAL" >
+				<column name="id_signal" />
+			</index>
+			<fk name="fk_automate" to_schema="dia1" to_table="state         " >
+				<fk_column name="id_state_from" pk="id" />
+			</fk>
+			<fk name="fk_automate_0" to_schema="dia1" to_table="state         " >
+				<fk_column name="id_state_to" pk="id" />
+			</fk>
+			<fk name="fk_automate_1" to_schema="dia1" to_table="signal        " >
+				<fk_column name="id_signal" pk="id" />
+			</fk>
+			<storage><![CDATA[engine=InnoDB]]></storage>
+		</table>
+		<table name="operation" >
+			<column name="id" type="int" jt="4" mandatory="y" autoincrement="y" />
+			<column name="title" type="varchar" length="255" jt="12" />
+			<column name="id_input_state" type="int" jt="4" />
+			<index name="pk_operation" unique="PRIMARY_KEY" >
+				<column name="id" />
+			</index>
+			<index name="pk_operation_0" unique="UNIQUE" >
+				<column name="id" />
+				<column name="title" />
+			</index>
+			<index name="idx_operation" unique="NORMAL" >
+				<column name="id_input_state" />
+			</index>
+			<fk name="fk_operation" to_schema="dia1" to_table="state         " >
+				<fk_column name="id_input_state" pk="id" />
+			</fk>
+			<storage><![CDATA[engine=InnoDB]]></storage>
+		</table>
+		<table name="operation_output_states" >
+			<column name="id_operation" type="int" jt="4" />
+			<column name="id_state" type="int" jt="4" />
+			<index name="idx_operation_output_states" unique="NORMAL" >
+				<column name="id_operation" />
+			</index>
+			<index name="idx_operation_output_states_0" unique="NORMAL" >
+				<column name="id_state" />
+			</index>
+			<fk name="fk_operation_output_states" to_schema="dia1" to_table="operation" >
+				<fk_column name="id_operation" pk="id" />
+			</fk>
+			<fk name="fk_operation_output_states_0" to_schema="dia1" to_table="state         " >
+				<fk_column name="id_state" pk="id" />
+			</fk>
+			<storage><![CDATA[engine=InnoDB]]></storage>
+		</table>
+		<table name="operation_rel" >
+			<comment><![CDATA[описание отношений между операциями
+1 - операция уточнения
+2 - операция следования
+]]></comment>
+			<column name="id_first_operation" type="int" jt="4" />
+			<column name="id_second_operation" type="int" jt="4" />
+			<column name="rel_type" type="int" jt="4" />
+			<storage><![CDATA[engine=InnoDB]]></storage>
+		</table>
+		<table name="signal        " >
+			<comment><![CDATA[название инициатора активности]]></comment>
+			<column name="id" type="int" jt="4" mandatory="y" autoincrement="y" />
+			<column name="title" type="varchar" length="255" jt="12" />
+			<column name="id_operation" type="int" jt="4" >
+				<comment><![CDATA[первая обрабатывающая операция]]></comment>
+			</column>
+			<index name="pk_signal" unique="PRIMARY_KEY" >
+				<column name="id" />
+			</index>
+			<index name="idx_signal        " unique="NORMAL" >
+				<column name="id_operation" />
+			</index>
+			<fk name="fk_signal        " to_schema="dia1" to_table="operation" >
+				<fk_column name="id_operation" pk="id" />
+			</fk>
+			<storage><![CDATA[engine=InnoDB]]></storage>
+		</table>
+		<table name="state         " >
+			<comment><![CDATA[состояние объекта]]></comment>
+			<column name="id" type="int" jt="4" mandatory="y" autoincrement="y" />
+			<column name="title" type="int" jt="4" />
+			<column name="id_type" type="int" jt="4" />
+			<index name="pk_state" unique="PRIMARY_KEY" >
+				<column name="id" />
+			</index>
+			<index name="idx_state         " unique="NORMAL" >
+				<column name="id_type" />
+			</index>
+			<fk name="fk_state         " to_schema="dia1" to_table="type         " >
+				<fk_column name="id_type" pk="id" />
+			</fk>
+			<storage><![CDATA[engine=InnoDB]]></storage>
+		</table>
+		<table name="type         " >
+			<comment><![CDATA[тип объекта]]></comment>
+			<column name="id" type="int" jt="4" mandatory="y" autoincrement="y" />
+			<column name="title" type="varchar" length="255" jt="12" />
+			<index name="pk_type" unique="PRIMARY_KEY" >
+				<column name="id" />
+			</index>
+			<storage><![CDATA[engine=InnoDB]]></storage>
+		</table>
+	</schema>
+	<layout id="Layout_3245fb66" name="dia1" show_relation_columns="y" >
+		<entity schema="dia1" name="type         " color="b7c8e3" x="135" y="45" />
+		<entity schema="dia1" name="state         " color="b7c8e3" x="45" y="240" />
+		<entity schema="dia1" name="automate" color="b7c8e3" x="75" y="405" />
+		<entity schema="dia1" name="operation_rel" color="b7c8e3" x="645" y="120" />
+		<entity schema="dia1" name="operation" color="ff66cc" x="195" y="210" />
+		<entity schema="dia1" name="signal        " color="b7c8e3" x="390" y="405" />
+		<entity schema="dia1" name="operation_output_states" color="b7c8e3" x="450" y="150" />
+	</layout>
+</project>
