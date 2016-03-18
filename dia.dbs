@@ -25,6 +25,21 @@
 			</fk>
 			<storage><![CDATA[engine=InnoDB]]></storage>
 		</table>
+		<table name="controlled_member" >
+			<comment><![CDATA[содержит значения конкретных объектов]]></comment>
+			<column name="id" type="int" jt="4" mandatory="y" autoincrement="y" />
+			<column name="id_type" type="int" jt="4" />
+			<index name="pk_controlled_member" unique="PRIMARY_KEY" >
+				<column name="id" />
+			</index>
+			<index name="idx_controlled_member" unique="NORMAL" >
+				<column name="id_type" />
+			</index>
+			<fk name="fk_controlled_member" to_schema="dia1" to_table="type         " >
+				<fk_column name="id_type" pk="id" />
+			</fk>
+			<storage><![CDATA[engine=InnoDB]]></storage>
+		</table>
 		<table name="operation" >
 			<column name="id" type="int" jt="4" mandatory="y" autoincrement="y" />
 			<column name="title" type="varchar" length="255" jt="12" />
@@ -42,14 +57,14 @@
 			<index name="idx_operation" unique="NORMAL" >
 				<column name="id_input_state" />
 			</index>
-			<fk name="fk_operation" to_schema="dia1" to_table="state         " >
-				<fk_column name="id_input_state" pk="id" />
-			</fk>
 			<storage><![CDATA[engine=InnoDB]]></storage>
 		</table>
 		<table name="operation_output_states" >
 			<column name="id_operation" type="int" jt="4" />
 			<column name="id_state" type="int" jt="4" />
+			<column name="is_input" type="bit" jt="-7" >
+				<comment><![CDATA[указывает является ли входным параметром]]></comment>
+			</column>
 			<index name="idx_operation_output_states" unique="NORMAL" >
 				<column name="id_operation" />
 			</index>
@@ -87,6 +102,29 @@
 			</fk>
 			<storage><![CDATA[engine=InnoDB]]></storage>
 		</table>
+		<table name="repository_types" >
+			<comment><![CDATA[типы репозиториев]]></comment>
+			<column name="id" type="int" jt="4" mandatory="y" autoincrement="y" />
+			<column name="title" type="varchar" length="255" jt="12" >
+				<comment><![CDATA[название хранилища]]></comment>
+			</column>
+			<index name="pk_repository_types" unique="PRIMARY_KEY" >
+				<column name="id" />
+			</index>
+			<storage><![CDATA[engine=InnoDB]]></storage>
+		</table>
+		<table name="sensor         " >
+			<comment><![CDATA[устраойства при поможи которых система получает информацию из среды
+Сенсоры преобразуют и подают сигналы в автомат
+
+сокет - который преобразует входные данные в сигналы]]></comment>
+			<column name="id" type="int" jt="4" mandatory="y" autoincrement="y" />
+			<column name="title" type="varchar" length="255" jt="12" />
+			<index name="pk_sensor" unique="PRIMARY_KEY" >
+				<column name="id" />
+			</index>
+			<storage><![CDATA[engine=InnoDB]]></storage>
+		</table>
 		<table name="signal        " >
 			<comment><![CDATA[название инициатора активности]]></comment>
 			<column name="id" type="int" jt="4" mandatory="y" autoincrement="y" />
@@ -94,14 +132,21 @@
 			<column name="id_operation" type="int" jt="4" >
 				<comment><![CDATA[первая обрабатывающая операция]]></comment>
 			</column>
+			<column name="id_member" type="int" jt="4" />
 			<index name="pk_signal" unique="PRIMARY_KEY" >
 				<column name="id" />
 			</index>
 			<index name="idx_signal        " unique="NORMAL" >
 				<column name="id_operation" />
 			</index>
+			<index name="idx_signal        _0" unique="NORMAL" >
+				<column name="id_member" />
+			</index>
 			<fk name="fk_signal        " to_schema="dia1" to_table="operation" >
 				<fk_column name="id_operation" pk="id" />
+			</fk>
+			<fk name="fk_signal        _0" to_schema="dia1" to_table="controlled_member" >
+				<fk_column name="id_member" pk="id" />
 			</fk>
 			<storage><![CDATA[engine=InnoDB]]></storage>
 		</table>
@@ -110,6 +155,12 @@
 			<column name="id" type="int" jt="4" mandatory="y" autoincrement="y" />
 			<column name="title" type="int" jt="4" />
 			<column name="id_type" type="int" jt="4" />
+			<column name="id_base_state" type="int" jt="4" >
+				<comment><![CDATA[ссылка на базовое состояние
+Операции работают с конкретными состояниями объектов
+
+Операция обрабатывающая более общее состояние может работать и с объектами в конкретизированном состоянии]]></comment>
+			</column>
 			<index name="pk_state" unique="PRIMARY_KEY" >
 				<column name="id" />
 			</index>
@@ -121,10 +172,17 @@
 			</fk>
 			<storage><![CDATA[engine=InnoDB]]></storage>
 		</table>
+		<table name="table_0" />
 		<table name="type         " >
 			<comment><![CDATA[тип объекта]]></comment>
 			<column name="id" type="int" jt="4" mandatory="y" autoincrement="y" />
 			<column name="title" type="varchar" length="255" jt="12" />
+			<column name="supertype_id" type="int" jt="4" >
+				<comment><![CDATA[ссылка на базовый класс]]></comment>
+			</column>
+			<column name="format" type="varchar" length="2000" jt="12" >
+				<comment><![CDATA[описание формата]]></comment>
+			</column>
 			<index name="pk_type" unique="PRIMARY_KEY" >
 				<column name="id" />
 			</index>
@@ -132,12 +190,15 @@
 		</table>
 	</schema>
 	<layout id="Layout_3245fb66" name="dia1" show_relation_columns="y" >
-		<entity schema="dia1" name="type         " color="b7c8e3" x="135" y="45" />
-		<entity schema="dia1" name="state         " color="b7c8e3" x="45" y="240" />
-		<entity schema="dia1" name="automate" color="b7c8e3" x="75" y="405" />
-		<entity schema="dia1" name="signal        " color="b7c8e3" x="390" y="405" />
-		<entity schema="dia1" name="operation_output_states" color="b7c8e3" x="450" y="150" />
-		<entity schema="dia1" name="operation_rel" color="b7c8e3" x="435" y="285" />
-		<entity schema="dia1" name="operation" color="ff66cc" x="195" y="210" />
+		<entity schema="dia1" name="operation" color="ff66cc" x="330" y="180" />
+		<entity schema="dia1" name="automate" color="b7c8e3" x="45" y="435" />
+		<entity schema="dia1" name="sensor         " color="b7c8e3" x="780" y="210" />
+		<entity schema="dia1" name="operation_rel" color="b7c8e3" x="555" y="180" />
+		<entity schema="dia1" name="signal        " color="b7c8e3" x="285" y="435" />
+		<entity schema="dia1" name="state         " color="b7c8e3" x="45" y="180" />
+		<entity schema="dia1" name="controlled_member" color="b7c8e3" x="240" y="60" />
+		<entity schema="dia1" name="operation_output_states" color="b7c8e3" x="165" y="210" />
+		<entity schema="dia1" name="repository_types" color="b7c8e3" x="855" y="435" />
+		<entity schema="dia1" name="type         " color="b7c8e3" x="45" y="45" />
 	</layout>
 </project>
